@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Live Language Translator</title>
+  <style>
+    body {
+      font-family: 'Open Sans', sans-serif;
+      background: #1e1e2f;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px;
+    }
+    h1 {
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+    .container {
+      display: flex;
+      gap: 20px;
+      width: 100%;
+      max-width: 900px;
+    }
+    textarea {
+      width: 100%;
+      height: 300px;
+      font-size: 18px;
+      padding: 15px;
+      border-radius: 10px;
+      border: none;
+      resize: none;
+      outline: none;
+      font-weight: bold;
+    }
+    #input {
+      background-color: #2e2e40;
+      color: #fff;
+    }
+    #output {
+      background-color: #f3f3f3;
+      color: #000;
+    }
+    .lang-select {
+      margin-top: 15px;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: none;
+      font-weight: bold;
+    }
+    .lang-container {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 900px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🌐 MA Translator</h1>
+  
+  <div class="container">
+    <div style="width: 100%;">
+      <textarea id="input" placeholder="Start typing or speaking..."></textarea>
+      <select id="sourceLang" class="lang-select">
+        <option value="en">English</option>
+        <option value="ur">Urdu</option>
+        <option value="hi">Hindi</option>
+        <option value="ar">Arabic</option>
+        <option value="fr">French</option>
+        <option value="es">Spanish</option>
+      </select>
+    </div>
+    <div style="width: 100%;">
+      <textarea id="output" placeholder="Translation appears here..." readonly></textarea>
+      <select id="targetLang" class="lang-select">
+        <option value="en">English</option>
+        <option value="ur">Urdu</option>
+        <option value="hi">Hindi</option>
+        <option value="ar">Arabic</option>
+        <option value="fr">French</option>
+        <option value="es">Spanish</option>
+      </select>
+    </div>
+  </div>
+
+  <script>
+    const inputBox = document.getElementById('input');
+    const outputBox = document.getElementById('output');
+    const sourceLangSelect = document.getElementById('sourceLang');
+    const targetLangSelect = document.getElementById('targetLang');
+
+    const maxChars = 20000;
+
+    let timer;
+
+    inputBox.addEventListener('input', () => {
+      if (inputBox.value.length > maxChars) {
+        inputBox.value = inputBox.value.substring(0, maxChars);
+        alert(`Text limited to ${maxChars} characters.`);
+      }
+
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        translateText(inputBox.value);
+      }, 400);
+    });
+
+    async function translateText(text) {
+      if (!text.trim()) {
+        outputBox.value = '';
+        return;
+      }
+
+      try {
+        const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${sourceLangSelect.value}|${targetLangSelect.value}`);
+        
+        const data = await res.json();
+        outputBox.value = data.responseData.translatedText || "(Translation failed)";
+      } catch (err) {
+        outputBox.value = "(Error translating)";
+        console.error(err);
+      }
+    }
+  </script>
+</body>
+</html>
